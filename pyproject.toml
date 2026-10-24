@@ -1,0 +1,18 @@
+[project]
+name = "xairglow"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "torchvision",
+    "pydantic>=2",
+    "numpy",
+    "h5py",
+    "tqdm",
+    "opencv-python-headless",
+    "scipy",
+    "pillow",
+]
+
+[dependency-groups]
+notebooks = ["matplotlib", "scikit-image", "scikit-spatial", "ipykernel"]

@@ -113,7 +113,9 @@ class PlaneWave2D(BaseWave):
     @computed_field
     @property
     def random_phases(self) -> list[float]:
-        return self._compute_random_values_circular_offset(self.phase_noise, self.phase, self.n_waves - 1, self.seed)
+        # Phases are in radians (generate_plane_wave uses cos(k·x - phase)), so wrap at 2π.
+        # Wrapping at 360 caused phase jumps for phase - noise < 0 (e.g. -0.1 → 359.9 rad).
+        return self._compute_random_values_circular_offset(self.phase_noise, self.phase, self.n_waves - 1, self.seed, modulo= 2 * pi)
     
     @computed_field
     @property
@@ -232,11 +234,12 @@ class PlaneWave2D(BaseWave):
             random.seed(seed)
         return [(1 + random.uniform(-variation, variation)) * parameter for _ in range(n)]
 
-    def _compute_random_values_circular_offset(self, offset: float, parameter, n: int, seed: int = 0):
-        """Compute n random values. REMOVED round() to preserve gradients."""
+    def _compute_random_values_circular_offset(self, offset: float, parameter, n: int, seed: int = 0, modulo: float = 360):
+        """Compute n random values. REMOVED round() to preserve gradients.
+        modulo: 360 for angles in degrees, 2*pi for phases in radians."""
         if seed != 0:
             random.seed(seed)
-        return [(random.uniform(-offset, offset) + parameter) % 360 for _ in range(n)]
+        return [(random.uniform(-offset, offset) + parameter) % modulo for _ in range(n)]
 
 
 class RadialWave2D(BaseWave):
